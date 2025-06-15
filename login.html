@@ -5,13 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - K-pop Dance Competition</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https                            <svg xmlns="http://www.w3.org/2000/svg" class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none; width: 18px; height: 18px;">
-                                <path d="M12 5C5.636 5 2 12 2 12s3.636 7 10 7 10-7 10-7-3.636-7-10-7zm0 10.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/>
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: block; width: 18px; height: 18px;">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                                <line x1="1" y1="1" x2="23" y2="23" />
-                            </svg>unts.google.com/gsi/client" async></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async></script>
     <style>
         .login-container {
             max-width: 400px;
@@ -109,52 +104,10 @@
             background: rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             backdrop-filter: blur(10px);
-        }        .back-to-home:hover {
+        }
+
+        .back-to-home:hover {
             background: rgba(255, 255, 255, 0.3);
-        }
-
-        .password-input-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .password-input-container input {
-            width: 100%;
-            padding-right: 40px;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .password-toggle:hover {
-            opacity: 1;
-        }
-
-        .eye-icon {
-            font-size: 20px;
-            line-height: 1;
-        }
-
-        .login-options {
-            margin: 20px 0;
-        }
-
-        .login-with-email {
-            margin-top: 20px;
         }
 
         .password-input-wrapper {
@@ -168,62 +121,24 @@
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #667eea;
-            cursor: pointer;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-        }
-
-        .password-toggle:hover {
-            color: #5a67d8;
-        }
-
-        /* Updated icon styling */
-        .password-toggle svg {
-            pointer-events: none;
-            opacity: 0.6;
-            stroke-width: 1.5;
-            width: 18px;
-            height: 18px;
-        }
-
-        .password-toggle:hover svg {
-            opacity: 0.8;
-        }
-
-        /* Soften the icon appearance */
-        .eye-icon, .eye-off-icon {
             color: #666;
-            transition: opacity 0.2s ease;
-        }
-
-        /* Touch-friendly styling for password toggle */
-        .password-toggle {
-            min-width: 44px; /* Minimum touch target size */
-            min-height: 44px;
+            cursor: pointer;
+            padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-            touch-action: manipulation; /* Optimize for touch */
-            user-select: none; /* Prevent text selection */
         }
 
-        .password-toggle svg {
-            pointer-events: none; /* Ensure touch events work properly */
+        .password-toggle:hover {
+            color: #333;
         }
 
-        /* Ensure the password input has enough padding for the toggle button */
-        .password-input-wrapper input[type="password"],
-        .password-input-wrapper input[type="text"] {
-            padding-right: 50px;
+        .password-toggle i {
+            font-size: 16px;
         }
 
-        @media (hover: hover) {
-            .password-toggle:hover {
-                opacity: 0.8;
-            }
+        .form-group input {
+            padding-right: 40px;
         }
     </style>
 </head>
@@ -271,14 +186,9 @@
                     <label for="password">Password</label>
                     <div class="password-input-wrapper">
                         <input type="password" id="password" required>
-                        <button type="button" class="password-toggle" aria-label="Toggle password visibility">                            <!-- Simple eye icons for password visibility -->
-                            <svg xmlns="http://www.w3.org/2000/svg" class="eye-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="display: none; width: 20px; height: 20px;">
-                                <path d="M12 12c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z"/>
-                                <path d="M20 12c-2.667-4.667-6-7-10-7s-7.333 2.333-10 7c2.667 4.667 6 7 10 7s7.333-2.333 10-7z"/>
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="eye-off-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="display: none; width: 20px; height: 20px;">
-                                <path d="M19.5 16l-5.5-5.5M12 12l-8 8M4.5 16C3.167 14 2.5 12.667 2.5 12c0-1 2.167-3.667 6.5-8 1.333.667 2.667 1.333 4 2M9 4.33A10.2 10.2 0 0112 4c4.333 0 7.333 2.333 9 7-.72 1.67-1.72 3.03-3 4.08"/>
-                            </svg>
+                        <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                            <i class="fa-solid fa-eye eye-icon" style="display: none;"></i>
+                            <i class="fa-solid fa-eye-slash eye-off-icon"></i>
                         </button>
                     </div>
                 </div>
