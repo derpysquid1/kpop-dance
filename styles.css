@@ -108,6 +108,22 @@
         .nav-btn.disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            position: relative;
+        }
+
+        .nav-btn.disabled:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
         }
 
         .tab-content {
@@ -363,6 +379,77 @@
         .stat-label {
             color: #666;
             margin-top: 5px;
+        }
+
+        .profile-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            border: 3px solid #667eea;
+        }
+
+        .profile-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-section h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .status-registered {
+            color: #2f855a;
+            padding: 15px;
+            background: #f0fff4;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .status-not-registered {
+            color: #c53030;
+            padding: 15px;
+            background: #fff5f5;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .song-item, .vote-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .song-item h5 {
+            color: #2d3748;
+            margin: 0 0 5px 0;
+        }
+
+        .song-status {
+            font-size: 14px;
+            color: #718096;
         }
 
         @media (max-width: 768px) {

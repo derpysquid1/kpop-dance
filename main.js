@@ -48,14 +48,20 @@ let database = JSON.parse(localStorage.getItem('kpopCompetitionData')) || {
                 email: "admin@kpop.com",
                 reason: "Intense and challenging choreography!"
             }
-        ];
-
-        // Tab navigation
+        ];        // Tab navigation
         function showTab(tabName) {
-            const restrictedTabs = ['register', 'submit-song'];
-            if (restrictedTabs.includes(tabName) && !isLoggedIn) {
-                showMessage('register-message', 'Please sign in to access this feature', 'error');
+            // Check login for restricted tabs
+            if (!isLoggedIn && ['register', 'submit-song', 'profile'].includes(tabName)) {
+                window.location.href = 'login.html';
                 return;
+            }
+            
+            // Check participation for submit-song tab
+            if (tabName === 'submit-song') {
+                if (!checkUserParticipation()) {
+                    showMessage('submit-song', 'Only registered participants can submit songs. Please register for the competition first.', 'error');
+                    return;
+                }
             }
             
             // Hide all tabs
@@ -70,16 +76,31 @@ let database = JSON.parse(localStorage.getItem('kpopCompetitionData')) || {
             const selectedTab = document.getElementById(tabName);
             if (selectedTab) {
                 selectedTab.classList.add('active');
-                document.querySelector(`.nav-btn[onclick="showTab('${tabName}')"]`)?.classList.add('active');
-            }
-            
-            // Load content based on tab
-            if (tabName === 'voting') {
-                loadParticipants();
-            } else if (tabName === 'home') {
-                updateHomeStats();
-            } else if (tabName === 'register' && isLoggedIn) {
-                loadRegistrationProgress();
+                
+                // Add active class to the button
+                const activeBtn = document.querySelector(`.nav-btn[onclick*="${tabName}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+                
+                // Load tab-specific content
+                switch(tabName) {
+                    case 'voting':
+                        loadParticipants();
+                        break;
+                    case 'home':
+                        updateHomeStats();
+                        break;
+                    case 'register':
+                        if (isLoggedIn) loadRegistrationProgress();
+                        break;
+                    case 'profile':
+                        loadProfileContent();
+                        break;
+                    case 'submit-song':
+                        // Reset any previous error messages
+                        const messageDiv = document.getElementById('submit-song-message');
+                        if (messageDiv) messageDiv.innerHTML = '';
+                        break;
+                }
             }
         }        // Registration form handling
         document.getElementById('registration-form').addEventListener('submit', function(e) {
@@ -317,137 +338,257 @@ let database = JSON.parse(localStorage.getItem('kpopCompetitionData')) || {
             document.getElementById('total-songs').textContent = database.songs.length;
         }
 
-        // Show message helper
-        function showMessage(elementId, message, type) {
-            const messageElement = document.getElementById(elementId);
-            if (messageElement) {
-                messageElement.innerHTML = `<div class="${type}-message">${message}</div>`;
-                if (type !== 'error') {
-                    setTimeout(() => {
-                        messageElement.innerHTML = '';
-                    }, 5000);
-                }
+        // Check if user is a participant
+let userParticipation = false;
+
+function checkUserParticipation() {
+    if (!isLoggedIn || !currentUser) return false;
+    userParticipation = database.participants.some(p => p.userId === currentUser.id);
+    return userParticipation;
+}
+
+// Initialize UI based on auth state
+function initializeAuthUI() {
+    const userProfile = document.getElementById('user-profile');
+    const loginBtn = document.querySelector('.login-btn');
+    const profileBtn = document.getElementById('profile-btn');
+    const registerBtn = document.querySelector('.nav-btn[onclick*="register"]');
+    const submitSongBtn = document.querySelector('.nav-btn[onclick*="submit-song"]');
+    
+    // Check if user is a participant
+    checkUserParticipation();
+    
+    if (isLoggedIn && currentUser) {
+        // Show user profile
+        if (userProfile) {
+            userProfile.style.display = 'flex';
+            const avatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+            
+            if (currentUser.picture) {
+                avatar.src = currentUser.picture;
+            } else {
+                avatar.src = getInitialsAvatar(currentUser.name);
+            }
+            userName.textContent = currentUser.name;
+        }
+        
+        // Show profile button, hide login button
+        if (profileBtn) profileBtn.style.display = 'inline-block';
+        if (loginBtn) loginBtn.style.display = 'none';
+        
+        // Enable register button
+        if (registerBtn) {
+            registerBtn.classList.remove('disabled');
+            registerBtn.title = '';
+        }
+        
+        // Enable/disable submit song based on participation
+        if (submitSongBtn) {
+            if (userParticipation) {
+                submitSongBtn.classList.remove('disabled');
+                submitSongBtn.title = '';
+            } else {
+                submitSongBtn.classList.add('disabled');
+                submitSongBtn.title = 'Only registered participants can submit songs';
             }
         }
-
-        // Update tab visibility based on login state
-        function updateTabVisibility() {
-            const restrictedTabs = ['register', 'submit-song'];
-            
-            restrictedTabs.forEach(tabName => {
-                const tab = document.querySelector(`.nav-btn[onclick="showTab('${tabName}')"]`);
-                if (tab) {
-                    if (!isLoggedIn) {
-                        tab.classList.add('disabled');
-                        tab.title = 'Please sign in to access this feature';
-                    } else {
-                        tab.classList.remove('disabled');
-                        tab.title = '';
-                    }
-                }
-            });
-            
-            // If on a restricted tab while logged out, switch to home
-            if (!isLoggedIn && restrictedTabs.includes(document.querySelector('.tab-content.active')?.id)) {
-                showTab('home');
+    } else {
+        // Hide user profile
+        if (userProfile) userProfile.style.display = 'none';
+        
+        // Hide profile button, show login button
+        if (profileBtn) profileBtn.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        
+        // Disable restricted buttons
+        [registerBtn, submitSongBtn].forEach(btn => {
+            if (btn) {
+                btn.classList.add('disabled');
+                btn.title = 'Please sign in to access this feature';
             }
-        }
-
-        // Update initialization
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeAuthUI();
-            updateTabVisibility();
-            updateHomeStats();
-            setupRegistrationAutosave();
         });
+    }
+}
 
-        // Export data function
-        function exportData() {
-            const data = {
-                participants: database.participants,
-                votes: database.votes,
-                songs: database.songs,
-                voters: database.voters,
-                exportDate: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `kpop-competition-data-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
+// Load profile content
+function loadProfileContent() {
+    if (!isLoggedIn || !currentUser) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    const profileContainer = document.getElementById('profile');
+    if (!profileContainer) return;
 
-        // Clear all data function
-        function clearAllData() {
-            if (confirm('Are you sure you want to clear all data? This action cannot be undone!')) {
-                database = {
-                    participants: [],
-                    votes: [],
-                    songs: [
-                        {
-                            id: 1,
-                            title: "Dynamite",
-                            artist: "BTS",
-                            genre: "k-pop",
-                            year: 2020,
-                            url: "https://www.youtube.com/watch?v=gdZLi9oWNZg",
-                            submitter: "Admin",
-                            email: "admin@kpop.com",
-                            reason: "Perfect for energetic dance routines!"
-                        },
-                        {
-                            id: 2,
-                            title: "How You Like That",
-                            artist: "BLACKPINK",
-                            genre: "k-pop",
-                            year: 2020,
-                            url: "https://www.youtube.com/watch?v=ioNng23DkIM",
-                            submitter: "Admin",
-                            email: "admin@kpop.com",
-                            reason: "Great choreography and beat!"
-                        },
-                        {
-                            id: 3,
-                            title: "God's Menu",
-                            artist: "Stray Kids",
-                            genre: "k-pop",
-                            year: 2020,
-                            url: "https://www.youtube.com/watch?v=TQTlCHxyuu8",
-                            submitter: "Admin",
-                            email: "admin@kpop.com",
-                            reason: "Intense and challenging choreography!"
-                        }
-                    ],
-                    voters: []
-                };
-                
-                // Clear all forms
-                document.getElementById('registration-form').reset();
-                document.getElementById('song-form').reset();
-                document.getElementById('voter-name').value = '';
-                document.getElementById('voter-email').value = '';
-                
-                // Clear all messages
-                document.getElementById('register-message').innerHTML = '';
-                document.getElementById('voting-message').innerHTML = '';
-                document.getElementById('song-message').innerHTML = '';
-                
-                // Update displays
-                updateHomeStats();
-                loadParticipants();
-                loadSongs();
-                loadAdminData();
-                
-                alert('All data has been cleared!');
-            }
-        }        // Initialize the page
+    // Update profile header
+    const profileHeader = `
+        <div class="profile-header">
+            <img src="${currentUser.picture || getInitialsAvatar(currentUser.name)}" 
+                 alt="Profile" id="profile-avatar">
+            <h3>${currentUser.name}</h3>
+            <p>${currentUser.email}</p>
+        </div>
+    `;
+
+    // Update participation status
+    const participant = database.participants.find(p => p.userId === currentUser.id);
+    const participationStatus = participant ? `
+        <div class="status-registered">
+            <h4>✅ Competition Participant</h4>
+            <p><strong>Dance Style:</strong> ${participant.danceStyle}</p>
+            <p><strong>Experience:</strong> ${participant.experience} years</p>
+            <p><strong>Registration Date:</strong> ${new Date(participant.registrationDate).toLocaleDateString()}</p>
+            <p><strong>Votes Received:</strong> ${participant.votes || 0}</p>
+        </div>
+    ` : `
+        <div class="status-not-registered">
+            <h4>❌ Not Registered</h4>
+            <p>You haven't registered for the competition yet.</p>
+            <button onclick="showTab('register')" class="btn">Register Now</button>
+        </div>
+    `;
+
+    // Get user's submitted songs
+    const userSongs = database.songs
+        .filter(song => song.submitter === currentUser.email)
+        .map(song => `
+            <div class="song-item">
+                <h5>${song.title}</h5>
+                <p>${song.artist} (${song.year})</p>
+                <p class="song-status">Status: ${song.status || 'Pending'}</p>
+            </div>
+        `).join('') || '<p>No songs submitted yet</p>';
+
+    // Get user's voting history
+    const votingHistory = database.votes
+        .filter(vote => vote.voterEmail === currentUser.email)
+        .map(vote => {
+            const votedParticipant = database.participants.find(p => p.id === vote.participantId);
+            return `
+                <div class="vote-item">
+                    <p>Voted for: ${votedParticipant ? votedParticipant.name : 'Unknown'}</p>
+                    <p>Date: ${new Date(vote.date).toLocaleDateString()}</p>
+                </div>
+            `;
+        }).join('') || '<p>No voting history</p>';
+
+    // Update profile content
+    profileContainer.innerHTML = `
+        <div class="profile-content">
+            ${profileHeader}
+            <div class="profile-section">
+                <h4>Participation Status</h4>
+                ${participationStatus}
+            </div>
+            <div class="profile-section">
+                <h4>My Song Submissions</h4>
+                <div class="songs-list">
+                    ${userSongs}
+                </div>
+            </div>
+            <div class="profile-section">
+                <h4>My Voting History</h4>
+                <div class="voting-list">
+                    ${votingHistory}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Helper function to generate initials avatar
+function getInitialsAvatar(name) {
+    return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="%23667eea"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-size="12">${name.charAt(0).toUpperCase()}</text></svg>`;
+}
+
+// Export data function
+function exportData() {
+    const data = {
+        participants: database.participants,
+        votes: database.votes,
+        songs: database.songs,
+        voters: database.voters,
+        exportDate: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `kpop-competition-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// Clear all data function
+function clearAllData() {
+    if (confirm('Are you sure you want to clear all data? This action cannot be undone!')) {
+        database = {
+            participants: [],
+            votes: [],
+            songs: [
+                {
+                    id: 1,
+                    title: "Dynamite",
+                    artist: "BTS",
+                    genre: "k-pop",
+                    year: 2020,
+                    url: "https://www.youtube.com/watch?v=gdZLi9oWNZg",
+                    submitter: "Admin",
+                    email: "admin@kpop.com",
+                    reason: "Perfect for energetic dance routines!"
+                },
+                {
+                    id: 2,
+                    title: "How You Like That",
+                    artist: "BLACKPINK",
+                    genre: "k-pop",
+                    year: 2020,
+                    url: "https://www.youtube.com/watch?v=ioNng23DkIM",
+                    submitter: "Admin",
+                    email: "admin@kpop.com",
+                    reason: "Great choreography and beat!"
+                },
+                {
+                    id: 3,
+                    title: "God's Menu",
+                    artist: "Stray Kids",
+                    genre: "k-pop",
+                    year: 2020,
+                    url: "https://www.youtube.com/watch?v=TQTlCHxyuu8",
+                    submitter: "Admin",
+                    email: "admin@kpop.com",
+                    reason: "Intense and challenging choreography!"
+                }
+            ],
+            voters: []
+        };
+        
+        // Clear all forms
+        document.getElementById('registration-form').reset();
+        document.getElementById('song-form').reset();
+        document.getElementById('voter-name').value = '';
+        document.getElementById('voter-email').value = '';
+        
+        // Clear all messages
+        document.getElementById('register-message').innerHTML = '';
+        document.getElementById('voting-message').innerHTML = '';
+        document.getElementById('song-message').innerHTML = '';
+        
+        // Update displays
+        updateHomeStats();
+        loadParticipants();
+        loadSongs();
+        loadAdminData();
+        
+        alert('All data has been cleared!');
+    }
+}        // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             initializeAuthUI();
             updateHomeStats();
@@ -587,3 +728,150 @@ document.addEventListener('DOMContentLoaded', function() {
     setupRegistrationAutosave();
     // ...existing init code...
 });
+
+// Initialize UI based on auth state
+function initializeUI() {
+    const userProfile = document.getElementById('user-profile');
+    const loginBtn = document.querySelector('.login-btn');
+    const profileBtn = document.getElementById('profile-btn');
+    
+    if (isLoggedIn && currentUser) {
+        // Update header profile
+        if (userProfile) {
+            userProfile.style.display = 'flex';
+            const avatar = document.getElementById('user-avatar');
+            avatar.src = currentUser.picture || 
+                `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="%23667eea"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-size="12">${currentUser.name.charAt(0).toUpperCase()}</text></svg>`;
+            document.getElementById('user-name').textContent = currentUser.name;
+        }
+        
+        // Show profile button, hide login button
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (profileBtn) profileBtn.style.display = '';
+        
+        // Check if user is a participant
+        userParticipation = database.participants.find(p => p.userId === currentUser.id);
+    } else {
+        // Hide profile elements, show login button
+        if (userProfile) userProfile.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = '';
+    const restrictedTabs = ['register', 'submit-song', 'profile'];
+    
+    restrictedTabs.forEach(tabName => {
+        const tab = document.querySelector(`.nav-btn[onclick*="${tabName}"]`);
+        if (tab) {
+            if (!isLoggedIn) {
+                tab.classList.add('disabled');
+                tab.title = 'Please sign in to access this feature';
+            } else if (tabName === 'submit-song' && !userParticipation) {
+                tab.classList.add('disabled');
+                tab.title = 'Only registered participants can submit songs';
+            } else {
+                tab.classList.remove('disabled');
+                tab.title = '';
+            }
+        }
+    });
+}
+
+// Load profile content
+function loadProfileContent() {
+    if (!isLoggedIn || !currentUser) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    const profileContainer = document.getElementById('profile');
+    if (!profileContainer) return;
+
+    // Update profile header
+    const profileHeader = `
+        <div class="profile-header">
+            <img src="${currentUser.picture || getInitialsAvatar(currentUser.name)}" 
+                 alt="Profile" id="profile-avatar">
+            <h3>${currentUser.name}</h3>
+            <p>${currentUser.email}</p>
+        </div>
+    `;
+
+    // Update participation status
+    const participant = database.participants.find(p => p.userId === currentUser.id);
+    const participationStatus = participant ? `
+        <div class="status-registered">
+            <h4>✅ Competition Participant</h4>
+            <p><strong>Dance Style:</strong> ${participant.danceStyle}</p>
+            <p><strong>Experience:</strong> ${participant.experience} years</p>
+            <p><strong>Registration Date:</strong> ${new Date(participant.registrationDate).toLocaleDateString()}</p>
+            <p><strong>Votes Received:</strong> ${participant.votes || 0}</p>
+        </div>
+    ` : `
+        <div class="status-not-registered">
+            <h4>❌ Not Registered</h4>
+            <p>You haven't registered for the competition yet.</p>
+            <button onclick="showTab('register')" class="btn">Register Now</button>
+        </div>
+    `;
+
+    // Get user's submitted songs
+    const userSongs = database.songs
+        .filter(song => song.submitter === currentUser.email)
+        .map(song => `
+            <div class="song-item">
+                <h5>${song.title}</h5>
+                <p>${song.artist} (${song.year})</p>
+                <p class="song-status">Status: ${song.status || 'Pending'}</p>
+            </div>
+        `).join('') || '<p>No songs submitted yet</p>';
+
+    // Get user's voting history
+    const votingHistory = database.votes
+        .filter(vote => vote.voterEmail === currentUser.email)
+        .map(vote => {
+            const votedParticipant = database.participants.find(p => p.id === vote.participantId);
+            return `
+                <div class="vote-item">
+                    <p>Voted for: ${votedParticipant ? votedParticipant.name : 'Unknown'}</p>
+                    <p>Date: ${new Date(vote.date).toLocaleDateString()}</p>
+                </div>
+            `;
+        }).join('') || '<p>No voting history</p>';
+
+    // Update profile content
+    profileContainer.innerHTML = `
+        <div class="profile-content">
+            ${profileHeader}
+            <div class="profile-section">
+                <h4>Participation Status</h4>
+                ${participationStatus}
+            </div>
+            <div class="profile-section">
+                <h4>My Song Submissions</h4>
+                <div class="songs-list">
+                    ${userSongs}
+                </div>
+            </div>
+            <div class="profile-section">
+                <h4>My Voting History</h4>
+                <div class="voting-list">
+                    ${votingHistory}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Helper function to generate initials avatar
+function getInitialsAvatar(name) {
+    return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="%23667eea"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-size="12">${name.charAt(0).toUpperCase()}</text></svg>`;
+}
+
+// Show message helper
+function showMessage(elementId, message, type) {
+    const messageElement = document.getElementById(elementId);
+    if (messageElement) {
+        messageElement.innerHTML = `<div class="${type}-message">${message}</div>`;
+        if (type !== 'error') {
+            setTimeout(() => messageElement.innerHTML = '', 5000);
+        }
+    }
+}
