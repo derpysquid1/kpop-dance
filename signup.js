@@ -182,3 +182,41 @@ function showMessage(message, type) {
         }, 5000);
     }
 }
+
+// Password visibility toggle function
+function togglePassword(inputId, show) {
+    const input = document.getElementById(inputId);
+    const button = input.parentElement.querySelector('.password-toggle');
+    const eyeIcon = button.querySelector('.eye-icon');
+    const eyeOffIcon = button.querySelector('.eye-off-icon');
+
+    input.type = show ? 'text' : 'password';
+    eyeIcon.style.display = show ? 'block' : 'none';
+    eyeOffIcon.style.display = show ? 'none' : 'block';
+}
+
+// Initialize password toggle buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInputs = ['password', 'confirm-password'];
+    passwordInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        const button = input.parentElement.querySelector('.password-toggle');
+        
+        // Set initial state
+        const eyeIcon = button.querySelector('.eye-icon');
+        const eyeOffIcon = button.querySelector('.eye-off-icon');
+        eyeIcon.style.display = 'none';
+        eyeOffIcon.style.display = 'block';
+        
+        // Add touch events for mobile
+        button.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            togglePassword(inputId, true);
+        });
+        
+        button.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            togglePassword(inputId, false);
+        });
+    });
+});

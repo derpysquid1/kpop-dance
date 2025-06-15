@@ -117,6 +117,14 @@
         }
 
         .password-toggle {
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
             position: absolute;
             right: 5px;
             top: 50%;
@@ -124,21 +132,33 @@
             background: none;
             border: none;
             cursor: pointer;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.7;
-            transition: opacity 0.2s;
         }
 
-        .password-toggle:hover {
-            opacity: 1;
+        .password-toggle svg {
+            pointer-events: none;
+            opacity: 0.6;
+            stroke-width: 1.5;
+            width: 18px;
+            height: 18px;
+            color: #666;
+            transition: opacity 0.2s ease;
         }
 
-        .eye-icon {
-            font-size: 20px;
-            line-height: 1;
+        .password-toggle:hover svg {
+            opacity: 0.8;
+        }
+
+        /* Ensure the password input has enough padding for the toggle button */
+        .password-input-container input[type="password"],
+        .password-input-container input[type="text"] {
+            padding-right: 50px;
+            width: 100%;
+        }
+
+        @media (hover: hover) {
+            .password-toggle:hover {
+                opacity: 0.8;
+            }
         }
 
         .form-footer {
@@ -200,9 +220,14 @@
                 </div>                <div class="form-group">
                     <label for="password">Password</label>
                     <div class="password-input-container">
-                        <input type="password" id="password" required minlength="8">
-                        <button type="button" class="password-toggle" onpointerdown="togglePassword('password', true)" onpointerup="togglePassword('password', false)" onpointerout="togglePassword('password', false)">
-                            <span class="eye-icon">👁️</span>
+                        <input type="password" id="password" required minlength="8">                        <button type="button" class="password-toggle" onpointerdown="togglePassword('password', true)" onpointerup="togglePassword('password', false)" onpointerout="togglePassword('password', false)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="eye-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="display: none; width: 18px; height: 18px;">
+                                <path d="M12 12c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z"/>
+                                <path d="M20 12c-2.667-4.667-6-7-10-7s-7.333 2.333-10 7c2.667 4.667 6 7 10 7s7.333-2.333 10-7z"/>
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="eye-off-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="display: block; width: 18px; height: 18px;">
+                                <path d="M19.5 16l-5.5-5.5M12 12l-8 8M4.5 16C3.167 14 2.5 12.667 2.5 12c0-1 2.167-3.667 6.5-8 1.333.667 2.667 1.333 4 2M9 4.33A10.2 10.2 0 0112 4c4.333 0 7.333 2.333 9 7-.72 1.67-1.72 3.03-3 4.08"/>
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -212,7 +237,13 @@
                     <div class="password-input-container">
                         <input type="password" id="confirm-password" required minlength="8">
                         <button type="button" class="password-toggle" onpointerdown="togglePassword('confirm-password', true)" onpointerup="togglePassword('confirm-password', false)" onpointerout="togglePassword('confirm-password', false)">
-                            <span class="eye-icon">👁️</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="eye-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="display: none; width: 18px; height: 18px;">
+                                <path d="M12 12c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z"/>
+                                <path d="M20 12c-2.667-4.667-6-7-10-7s-7.333 2.333-10 7c2.667 4.667 6 7 10 7s7.333-2.333 10-7z"/>
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="eye-off-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="display: block; width: 18px; height: 18px;">
+                                <path d="M19.5 16l-5.5-5.5M12 12l-8 8M4.5 16C3.167 14 2.5 12.667 2.5 12c0-1 2.167-3.667 6.5-8 1.333.667 2.667 1.333 4 2M9 4.33A10.2 10.2 0 0112 4c4.333 0 7.333 2.333 9 7-.72 1.67-1.72 3.03-3 4.08"/>
+                            </svg>
                         </button>
                     </div>
                 </div>
