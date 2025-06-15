@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-pop Dance Competition - Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-wrapper {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-container {
+            display: none;
+        }
+
+        .dashboard-container.active {
+            display: block;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .admin-nav button {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table th {
+            background: #667eea;
+            color: white;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+
+        .edit-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-section {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .admin-header h1 {
+            margin: 0;
+            color: white;
+        }
+
+        .refresh-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Login Form -->
+        <div id="login-section" class="login-container">
+            <h2 style="text-align: center; margin-bottom: 30px;">👤 Admin Login</h2>
+            <div id="login-message"></div>
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Login</button>
+            </form>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard-section" class="dashboard-container">
+            <div class="admin-header">
+                <h1>⚙️ Admin Dashboard</h1>
+                <div>
+                    <button onclick="location.href='index.html'" class="refresh-btn">← Back to Main Site</button>
+                    <button onclick="refreshData()" class="refresh-btn">🔄 Refresh Data</button>
+                    <button onclick="logout()" class="refresh-btn">🚪 Logout</button>
+                </div>
+            </div>
+
+            <div class="admin-nav">
+                <button class="nav-btn active" onclick="showAdminTab('overview')">📊 Overview</button>
+                <button class="nav-btn" onclick="showAdminTab('participants')">👥 Participants</button>
+                <button class="nav-btn" onclick="showAdminTab('votes')">🗳️ Votes</button>
+                <button class="nav-btn" onclick="showAdminTab('songs')">🎵 Songs</button>
+                <button class="nav-btn" onclick="showAdminTab('settings')">⚙️ Settings</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="overview" class="admin-tab active">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-participants">0</div>
+                        <div class="stat-label">Total Participants</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-votes">0</div>
+                        <div class="stat-label">Total Votes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-songs">0</div>
+                        <div class="stat-label">Songs Submitted</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-voters">0</div>
+                        <div class="stat-label">Unique Voters</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>🏆 Top 10 Most Voted Participants</h3>
+                    <div id="top-participants-chart"></div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>📈 Registration Trend</h3>
+                    <div id="registration-trend-chart"></div>
+                </div>
+            </div>
+
+            <!-- Participants Tab -->
+            <div id="participants" class="admin-tab">
+                <div class="filter-section">
+                    <div class="form-group" style="display: inline-block; width: 200px; margin-right: 15px;">
+                        <input type="text" id="participant-search" placeholder="Search participants...">
+                    </div>
+                    <button class="btn" onclick="exportParticipants()">📥 Export Participants</button>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Age</th>
+                                <th>Dance Style</th>
+                                <th>Registration Date</th>
+                                <th>Votes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="participants-table-body">
+                            <!-- Participants will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Votes Tab -->
+            <div id="votes" class="admin-tab">
+                <div class="filter-section">
+                    <div class="form-group" style="display: inline-block; width: 200px; margin-right: 15px;">
+                        <input type="text" id="vote-search" placeholder="Search votes...">
+                    </div>
+                    <button class="btn" onclick="exportVotes()">📥 Export Votes</button>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Voter Name</th>
+                                <th>Voter Email</th>
+                                <th>Voted For</th>
+                                <th>Vote Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="votes-table-body">
+                            <!-- Votes will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Songs Tab -->
+            <div id="songs" class="admin-tab">
+                <div class="filter-section">
+                    <div class="form-group" style="display: inline-block; width: 200px; margin-right: 15px;">
+                        <input type="text" id="song-search" placeholder="Search songs...">
+                    </div>
+                    <button class="btn" onclick="exportSongs()">📥 Export Songs</button>
+                    <button class="btn" onclick="showAddSongModal()">➕ Add New Song</button>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Artist</th>
+                                <th>Genre</th>
+                                <th>Year</th>
+                                <th>Submitted By</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="songs-table-body">
+                            <!-- Songs will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="admin-tab">
+                <div class="admin-section">
+                    <h3>🔐 Security Settings</h3>
+                    <form id="security-form">
+                        <div class="form-group">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm Password</label>
+                            <input type="password" id="confirm-password">
+                        </div>
+                        <button type="submit" class="btn">Update Password</button>
+                    </form>
+                </div>
+
+                <div class="admin-section">
+                    <h3>🗑️ Data Management</h3>
+                    <div style="margin-bottom: 20px;">
+                        <button class="btn" onclick="backupData()">💾 Backup All Data</button>
+                        <button class="btn" onclick="clearAllData()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
+                            🗑️ Clear All Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

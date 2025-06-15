@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-pop Dance Competition</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script src="main.js" defer></script>
+</head>
+<body>
+    <div class="container">        <div class="header">
+            <div class="user-auth">
+                
+                <div id="user-profile" style="display: none;">
+                    <img id="user-avatar" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+                    <span id="user-name"></span>
+                    <button onclick="signOut()" class="btn" style="margin-left: 10px;">Sign Out</button>
+                </div>
+            </div>
+            <h1>🎵 K-pop Dance Competition 🎵</h1>
+            <p>Show your moves and compete with the best K-pop dancers!</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="showTab('home')">🏠 Home</button>
+            <button class="nav-btn" onclick="showTab('register')">📝 Register</button>
+            <button class="nav-btn" onclick="showTab('voting')">🗳️ Vote</button>
+            <button class="nav-btn" onclick="showTab('submit-song')">📤 Submit Song</button>
+            <button class="nav-btn" onclick="window.location.href='admin.html'">⚙️ Admin</button>
+        </div>
+
+        <!-- Home Tab -->
+        <div id="home" class="tab-content active">
+            <div class="admin-section">
+                <h2>🏆 Welcome to K-pop Dance Competition!</h2>
+                <p>Join the ultimate K-pop dance competition and showcase your talent! Register to participate, vote for your favorite dancers, and submit your favorite K-pop songs for the competition.</p>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-participants">0</div>
+                        <div class="stat-label">Total Participants</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-votes">0</div>
+                        <div class="stat-label">Total Votes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-songs">0</div>
+                        <div class="stat-label">Available Songs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Tab -->
+        <div id="register" class="tab-content">
+            <h2>📝 Register for Competition</h2>
+            <div id="register-message"></div>
+            
+            <form id="registration-form">
+                <div class="form-group">
+                    <label for="participant-name">Full Name *</label>
+                    <input type="text" id="participant-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="participant-email">Email *</label>
+                    <input type="email" id="participant-email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="participant-age">Age *</label>
+                    <input type="number" id="participant-age" min="13" max="100" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="participant-phone">Phone Number *</label>
+                    <input type="tel" id="participant-phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dance-experience">Dance Experience (years) *</label>
+                    <input type="number" id="dance-experience" min="0" max="50" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="favorite-group">Favorite K-pop Group *</label>
+                    <input type="text" id="favorite-group" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dance-style">Dance Style *</label>
+                    <select id="dance-style" required>
+                        <option value="">Select Style</option>
+                        <option value="hip-hop">Hip Hop</option>
+                        <option value="contemporary">Contemporary</option>
+                        <option value="street">Street Dance</option>
+                        <option value="popping">Popping</option>
+                        <option value="locking">Locking</option>
+                        <option value="breaking">Breaking</option>
+                        <option value="choreography">Choreography</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="participant-bio">Tell us about yourself</label>
+                    <textarea id="participant-bio" placeholder="Share your dance journey, achievements, or anything you'd like others to know..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="participant-photo">Upload Your Photo * (for voting)</label>
+                    <div class="file-upload">
+                        <input type="file" id="participant-photo" accept="image/*" required>
+                        <label for="participant-photo" class="file-upload-label">
+                            📷 Click to upload your photo
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">🎯 Register Now</button>
+            </form>
+        </div>
+
+        <!-- Voting Tab -->
+        <div id="voting" class="tab-content">
+            <h2>🗳️ Vote for Your Favorite Dancers</h2>
+            <div id="voting-message"></div>
+            
+            <div class="form-group">
+                <label for="voter-name">Your Name (for voting record) *</label>
+                <input type="text" id="voter-name" placeholder="Enter your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="voter-email">Your Email *</label>
+                <input type="email" id="voter-email" placeholder="Enter your email">
+            </div>
+            
+            <div id="participants-list" class="participants-grid">
+                <!-- Participants will be loaded here -->
+            </div>
+        </div>
+        <!-- Submit Song Tab -->
+        <div id="submit-song" class="tab-content">
+            <h2>📤 Submit a K-pop Song</h2>
+            <div id="song-message"></div>
+            
+            <form id="song-form">
+                <div class="form-group">
+                    <label for="song-title">Song Title *</label>
+                    <input type="text" id="song-title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="song-artist">Artist/Group *</label>
+                    <input type="text" id="song-artist" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="song-genre">Genre</label>
+                    <select id="song-genre">
+                        <option value="">Select Genre</option>
+                        <option value="k-pop">K-pop</option>
+                        <option value="k-hip-hop">K-Hip Hop</option>
+                        <option value="k-r&b">K-R&B</option>
+                        <option value="k-rock">K-Rock</option>
+                        <option value="k-ballad">K-Ballad</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="song-year">Release Year</label>
+                    <input type="number" id="song-year" min="1990" max="2025">
+                </div>
+                
+                <div class="form-group">
+                    <label for="song-url">YouTube/Spotify URL</label>
+                    <input type="url" id="song-url" placeholder="https://...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="submitter-name">Your Name *</label>
+                    <input type="text" id="submitter-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="submitter-email">Your Email *</label>
+                    <input type="email" id="submitter-email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="song-reason">Why should this song be in the competition?</label>
+                    <textarea id="song-reason" placeholder="Tell us why this song would be great for dancing..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn">🎵 Submit Song</button>
+            </form>
+        </div>    </div>
+
+   </body>
+</html>
