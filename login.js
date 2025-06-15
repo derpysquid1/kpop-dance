@@ -169,3 +169,55 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('remember').checked = true;
     }
 });
+
+// Password visibility toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('password');
+    const toggleButton = document.querySelector('.password-toggle');
+    const eyeIcon = toggleButton.querySelector('.eye-icon');
+    const eyeOffIcon = toggleButton.querySelector('.eye-off-icon');
+
+    // Show the initial icon (eye-off for hidden password)
+    eyeOffIcon.style.display = 'block';
+
+    // Function to toggle password visibility
+    function togglePasswordVisibility(show) {
+        passwordInput.type = show ? 'text' : 'password';
+        eyeIcon.style.display = show ? 'block' : 'none';
+        eyeOffIcon.style.display = show ? 'none' : 'block';
+    }
+
+    // Handle click events (toggle on/off)
+    toggleButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        const currentType = passwordInput.type;
+        togglePasswordVisibility(currentType === 'password');
+    });
+
+    // Handle mouse events (show while holding)
+    toggleButton.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        togglePasswordVisibility(true);
+    });
+
+    toggleButton.addEventListener('mouseup', (e) => {
+        e.preventDefault();
+        togglePasswordVisibility(false);
+    });
+
+    toggleButton.addEventListener('mouseleave', (e) => {
+        e.preventDefault();
+        togglePasswordVisibility(false);
+    });
+
+    // Handle touch events for mobile devices
+    toggleButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        togglePasswordVisibility(true);
+    });
+
+    toggleButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        togglePasswordVisibility(false);
+    });
+});
