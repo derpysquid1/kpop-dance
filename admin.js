@@ -121,6 +121,7 @@ function showAdminTab(tabName) {
     // Hide all tabs
     document.querySelectorAll('.admin-tab').forEach(tab => {
         tab.classList.remove('active');
+        tab.style.display = 'none';  // Ensure tabs are hidden
     });
     
     // Remove active class from all buttons
@@ -129,13 +130,26 @@ function showAdminTab(tabName) {
     });
     
     // Show selected tab
-    document.getElementById(tabName).classList.add('active');
+    const selectedTab = document.getElementById(tabName);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+        selectedTab.style.display = 'block';  // Explicitly show the selected tab
+    }
     
     // Add active class to clicked button
-    event.target.classList.add('active');
+    const clickedButton = document.querySelector(`.admin-nav .nav-btn[onclick*="${tabName}"]`);
+    if (clickedButton) {
+        clickedButton.classList.add('active');
+    }
     
-    // Load tab-specific data
-    loadTabData(tabName);
+    // Update any dynamic content if needed
+    if (tabName === 'participants') {
+        displayParticipants();
+    } else if (tabName === 'votes') {
+        displayVotes();
+    } else if (tabName === 'songs') {
+        displaySongs();
+    }
 }
 
 // Load data for specific tabs
@@ -143,17 +157,32 @@ function loadTabData(tabName) {
     switch(tabName) {
         case 'overview':
             loadOverviewData();
+            updateDashboardStats();
             break;
+            
         case 'participants':
             loadParticipantsTable();
+            initializeParticipantSearch();
             break;
+            
         case 'votes':
             loadVotesTable();
+            initializeVoteSearch();
             break;
+            
         case 'songs':
             loadSongsTable();
+            initializeSongSearch();
             break;
     }
+}
+
+// Update dashboard statistics
+function updateDashboardStats() {
+    document.getElementById('total-participants').textContent = database.participants.length;
+    document.getElementById('total-votes').textContent = database.votes.length;
+    document.getElementById('total-songs').textContent = database.songs.length;
+    document.getElementById('total-voters').textContent = new Set(database.votes.map(vote => vote.voterEmail)).size;
 }
 
 // Load overview data
@@ -171,12 +200,14 @@ function loadOverviewData() {
     loadRegistrationTrendChart();
 }
 
-// Load participants table
+// Participants Management Functions
 function loadParticipantsTable() {
-    const tableBody = document.getElementById('participants-table-body');
+    const tbody = document.getElementById('participants-table-body');
+    tbody.innerHTML = '';
     
-    tableBody.innerHTML = database.participants.map(participant => `
-        <tr>
+    database.participants.forEach(participant => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
             <td>${participant.name}</td>
             <td>${participant.email}</td>
             <td>${participant.age}</td>
@@ -184,116 +215,134 @@ function loadParticipantsTable() {
             <td>${new Date(participant.registrationDate).toLocaleDateString()}</td>
             <td>${participant.votes || 0}</td>
             <td>
-                <button class="action-btn edit-btn" onclick="editParticipant(${participant.id})">✏️</button>
-                <button class="action-btn delete-btn" onclick="deleteParticipant(${participant.id})">🗑️</button>
+                <button onclick="editParticipant(${participant.id})" class="action-btn edit-btn">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteParticipant(${participant.id})" class="action-btn delete-btn">
+                    <i class="fas fa-trash"></i>
+                </button>
             </td>
-        </tr>
-    `).join('');
-}
-
-// Load votes table
-function loadVotesTable() {
-    const tableBody = document.getElementById('votes-table-body');
-    
-    tableBody.innerHTML = database.votes.map(vote => {
-        const participant = database.participants.find(p => p.id === vote.participantId);
-        return `
-            <tr>
-                <td>${vote.voterName}</td>
-                <td>${vote.voterEmail}</td>
-                <td>${participant ? participant.name : 'Unknown'}</td>
-                <td>${new Date(vote.voteDate).toLocaleString()}</td>
-                <td>
-                    <button class="action-btn delete-btn" onclick="deleteVote(${vote.id})">🗑️</button>
-                </td>
-            </tr>
         `;
-    }).join('');
+        tbody.appendChild(row);
+    });
 }
 
-// Load songs table
-function loadSongsTable() {
-    console.log('Loading songs table with data:', database.songs);
-    const tableBody = document.getElementById('songs-table-body');
-    
-    if (!database.songs || database.songs.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 20px;">
-                    No songs have been submitted yet.
-                    <br><br>
-                    <button class="btn" onclick="initializeSampleData(); loadDashboardData();">
-                        Load Sample Data
-                    </button>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    tableBody.innerHTML = database.songs.map(song => `
-        <tr>
-            <td>${song.title || 'Untitled'}</td>
-            <td>${song.artist || 'Unknown Artist'}</td>
-            <td>${song.genre || 'K-pop'}</td>
-            <td>${song.year || 'N/A'}</td>
-            <td>${song.submitter || 'Anonymous'}<br>
-                <small style="color: #666;">${song.email || 'No email'}</small>
-            </td>
-            <td>✅ Approved</td>
-            <td>
-                <button class="action-btn edit-btn" onclick="editSong(${song.id})" title="Edit Song">✏️</button>
-                <button class="action-btn delete-btn" onclick="deleteSong(${song.id})" title="Delete Song">🗑️</button>
-                ${song.url ? `<a href="${song.url}" target="_blank" class="action-btn" title="Listen" style="background: #667eea;">🎵</a>` : ''}
-            </td>
-        </tr>
-    `).join('');
-}
-
-// CRUD Operations
 function editParticipant(id) {
     const participant = database.participants.find(p => p.id === id);
     if (!participant) return;
     
-    // Implementation for editing participant
-    if (confirm('Edit participant: ' + participant.name + '?')) {
-        // Add your edit logic here
+    // Show edit modal with participant data
+    // You would implement a modal dialog here
+    const newData = window.prompt('Edit participant data (sample):', JSON.stringify(participant));
+    if (newData) {
+        try {
+            const updated = JSON.parse(newData);
+            const index = database.participants.findIndex(p => p.id === id);
+            database.participants[index] = { ...participant, ...updated };
+            saveDatabase();
+            loadParticipantsTable();
+        } catch (e) {
+            alert('Invalid data format');
+        }
     }
 }
 
 function deleteParticipant(id) {
     if (confirm('Are you sure you want to delete this participant?')) {
         database.participants = database.participants.filter(p => p.id !== id);
+        // Also delete related votes
         database.votes = database.votes.filter(v => v.participantId !== id);
         saveDatabase();
         loadParticipantsTable();
-        loadOverviewData();
+        updateDashboardStats();
     }
+}
+
+// Votes Management Functions
+function loadVotesTable() {
+    const tbody = document.getElementById('votes-table-body');
+    tbody.innerHTML = '';
+    
+    database.votes.forEach(vote => {
+        const participant = database.participants.find(p => p.id === vote.participantId);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${vote.voterName}</td>
+            <td>${vote.voterEmail}</td>
+            <td>${participant ? participant.name : 'Unknown Participant'}</td>
+            <td>${new Date(vote.voteDate).toLocaleString()}</td>
+            <td>
+                <button onclick="deleteVote(${vote.id})" class="action-btn delete-btn">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
 }
 
 function deleteVote(id) {
     if (confirm('Are you sure you want to delete this vote?')) {
         const vote = database.votes.find(v => v.id === id);
         if (vote) {
+            // Decrease participant's vote count
             const participant = database.participants.find(p => p.id === vote.participantId);
             if (participant) {
                 participant.votes = (participant.votes || 1) - 1;
             }
+            
+            database.votes = database.votes.filter(v => v.id !== id);
+            saveDatabase();
+            loadVotesTable();
+            updateDashboardStats();
         }
-        database.votes = database.votes.filter(v => v.id !== id);
-        saveDatabase();
-        loadVotesTable();
-        loadOverviewData();
     }
+}
+
+// Songs Management Functions
+function loadSongsTable() {
+    const tbody = document.getElementById('songs-table-body');
+    tbody.innerHTML = '';
+    
+    database.songs.forEach(song => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${song.title}</td>
+            <td>${song.artist}</td>
+            <td>${song.genre || 'N/A'}</td>
+            <td>${song.year || 'N/A'}</td>
+            <td>${song.submitter}</td>
+            <td><span class="status-badge">${song.status || 'Active'}</span></td>
+            <td>
+                <button onclick="editSong(${song.id})" class="action-btn edit-btn">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteSong(${song.id})" class="action-btn delete-btn">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
 }
 
 function editSong(id) {
     const song = database.songs.find(s => s.id === id);
     if (!song) return;
     
-    // Implementation for editing song
-    if (confirm('Edit song: ' + song.title + '?')) {
-        // Add your edit logic here
+    // Show edit modal with song data
+    // You would implement a modal dialog here
+    const newData = window.prompt('Edit song data (sample):', JSON.stringify(song));
+    if (newData) {
+        try {
+            const updated = JSON.parse(newData);
+            const index = database.songs.findIndex(s => s.id === id);
+            database.songs[index] = { ...song, ...updated };
+            saveDatabase();
+            loadSongsTable();
+        } catch (e) {
+            alert('Invalid data format');
+        }
     }
 }
 
@@ -302,42 +351,36 @@ function deleteSong(id) {
         database.songs = database.songs.filter(s => s.id !== id);
         saveDatabase();
         loadSongsTable();
-        loadOverviewData();
+        updateDashboardStats();
     }
 }
 
-// Export functions
+// Export Functions
 function exportParticipants() {
-    exportData('participants', database.participants);
+    const data = JSON.stringify(database.participants, null, 2);
+    downloadJson(data, 'participants-export.json');
 }
 
 function exportVotes() {
-    exportData('votes', database.votes);
+    const data = JSON.stringify(database.votes, null, 2);
+    downloadJson(data, 'votes-export.json');
 }
 
 function exportSongs() {
-    exportData('songs', database.songs);
+    const data = JSON.stringify(database.songs, null, 2);
+    downloadJson(data, 'songs-export.json');
 }
 
-function exportData(type, data) {
-    const exportData = {
-        [type]: data,
-        exportDate: new Date().toISOString()
-    };
-    
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `kpop-competition-${type}-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    showMessage(`${type}-message`, `${type} data exported successfully!`, 'success');
+function downloadJson(data, filename) {
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 }
 
 // Utility functions

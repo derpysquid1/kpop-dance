@@ -54,60 +54,108 @@ if (database.songs.length === 0) {
     localStorage.setItem('kpopCompetitionData', JSON.stringify(database));
 }
 
-// Tab navigation
-function showTab(tabName) {
-    // Check login for restricted tabs
-    if (!isLoggedIn && ['register', 'submit-song', 'profile'].includes(tabName)) {
+// Access control function
+function checkAccess(feature) {
+    if (!isLoggedIn) {
+        alert('Please log in first to access this feature.');
+        return false;
+    }
+    
+    switch (feature) {
+        case 'register':
+            // Allow registration if logged in and not already registered
+            if (userParticipation) {
+                alert('You are already registered as a participant!');
+                return false;
+            }
+            return true;
+        
+        case 'submit-song':
+            // Only allow song submission for registered participants
+            if (!userParticipation) {
+                alert('You must register as a participant first to submit songs.');
+                return false;
+            }
+            return true;
+        
+        case 'vote':
+            // Allow voting if logged in (could add more restrictions here)
+            return true;
+            
+        default:
+            return false;
+    }
+}
+
+// Function to handle restricted actions
+function handleRestrictedAction(action) {
+    if (!isLoggedIn) {
+        // Directly redirect to login page if not logged in
         window.location.href = 'login.html';
         return;
     }
     
-    // Check participation for submit-song tab
-    if (tabName === 'submit-song') {
-        if (!checkUserParticipation()) {
-            showMessage('submit-song', 'Only registered participants can submit songs. Please register for the competition first.', 'error');
+    // If logged in, proceed with normal tab switching
+    showTab(action);
+}
+
+// Function to update UI based on access rights
+function updateAccessUI() {
+    const registerBtn = document.querySelector('button[onclick*="showTab(\'register\')"]');
+    const submitSongBtn = document.querySelector('button[onclick*="showTab(\'submit-song\')"]');
+    const profileTab = document.querySelector('#profile-btn');
+
+    if (registerBtn) {
+        if (!isLoggedIn) {
+            registerBtn.classList.add('disabled');
+            registerBtn.title = 'Please sign in to access this feature';
+        } else {
+            registerBtn.classList.remove('disabled');
+            registerBtn.title = userParticipation ? 'You are already registered' : 'Register for the competition';
+        }
+    }
+
+    if (submitSongBtn) {
+        if (!isLoggedIn || !userParticipation) {
+            submitSongBtn.classList.add('disabled');
+            submitSongBtn.title = !isLoggedIn ? 'Please sign in to access this feature' : 'You must register first';
+        } else {
+            submitSongBtn.classList.remove('disabled');
+            submitSongBtn.title = 'Submit your song choice';
+        }
+    }
+
+    if (profileTab) {
+        profileTab.style.display = isLoggedIn ? 'block' : 'none';
+    }
+}
+
+// Tab navigation
+function showTab(tabName) {
+    // Check if trying to access restricted features
+    if (tabName === 'register' || tabName === 'submitSong') {
+        if (!isLoggedIn) {
+            window.location.href = 'login.html';
             return;
         }
     }
-    
+
     // Hide all tabs
-    const tabs = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => tab.classList.remove('active'));
-    
-    // Remove active class from all buttons
-    const buttons = document.querySelectorAll('.nav-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+    });
+
     // Show selected tab
     const selectedTab = document.getElementById(tabName);
     if (selectedTab) {
-        selectedTab.classList.add('active');
-        
-        // Add active class to the button
-        const activeBtn = document.querySelector(`.nav-btn[onclick*="${tabName}"]`);
-        if (activeBtn) activeBtn.classList.add('active');
-        
-        // Load tab-specific content
-        switch(tabName) {
-            case 'voting':
-                loadParticipants();
-                break;
-            case 'home':
-                updateHomeStats();
-                break;
-            case 'register':
-                if (isLoggedIn) loadRegistrationProgress();
-                break;
-            case 'profile':
-                loadProfileContent();
-                break;
-            case 'submit-song':
-                // Reset any previous error messages
-                const messageDiv = document.getElementById('submit-song-message');
-                if (messageDiv) messageDiv.innerHTML = '';
-                break;
-        }
+        selectedTab.style.display = 'block';
     }
+
+    // Update active state of navigation buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`button[onclick*="showTab('${tabName}')"]`).classList.add('active');
 }
 
 // Check if user is a participant
@@ -267,6 +315,140 @@ function loadProfileContent() {
     `;
 }
 
+// Function to load participants into dropdown
+function loadParticipantsDropdown() {
+    const select = document.getElementById('selected-participant');
+    if (!select) return;
+
+    // Clear existing options except the first one
+    while (select.options.length > 1) {
+        select.remove(1);
+    }
+
+    // Add participants from database
+    database.participants.forEach(participant => {
+        const option = document.createElement('option');
+        option.value = participant.email;
+        option.textContent = `${participant.name} - ${participant.danceStyle}`;
+        select.appendChild(option);
+    });
+}
+
+// Function to submit vote
+function submitVote() {
+    const voterName = document.getElementById('voter-name').value.trim();
+    const voterEmail = document.getElementById('voter-email').value.trim();
+    const selectedParticipant = document.getElementById('selected-participant').value;
+    const comment = document.getElementById('vote-comment').value.trim();
+
+    if (!voterName || !voterEmail || !selectedParticipant) {
+        alert('Please fill in all required fields!');
+        return;
+    }
+
+    // Check if voter has already voted
+    if (database.votes.some(v => v.voterEmail === voterEmail)) {
+        alert('You have already submitted a vote!');
+        return;
+    }
+
+    // Add vote to database
+    const vote = {
+        id: Date.now(),
+        voterName,
+        voterEmail,
+        participantId: selectedParticipant, // Make sure we're using participantId
+        comment,
+        timestamp: new Date().toISOString()
+    };
+
+    database.votes.push(vote);
+    localStorage.setItem('kpopCompetitionData', JSON.stringify(database));
+
+    // Clear form
+    document.getElementById('voting-form').reset();
+
+    // Update stats and rankings
+    updateStats();
+
+    alert('Thank you for voting!');
+}
+
+// Load participants when voting tab is shown
+document.addEventListener('DOMContentLoaded', () => {
+    const votingTab = document.getElementById('voting');
+    if (votingTab) {
+        loadParticipantsDropdown();
+    }
+});
+
+// Update participants list when database changes
+function updateParticipantsList() {
+    loadParticipantsDropdown();
+}
+
+// Function to calculate top voted participants
+function calculateTopVotedParticipants(limit = 5) {
+    // Create a map to count votes for each participant
+    const voteCount = new Map();
+    
+    // Count votes for each participant
+    database.votes.forEach(vote => {
+        const count = voteCount.get(vote.participantId) || 0;
+        voteCount.set(vote.participantId, count + 1);
+    });
+    
+    // Convert to array and sort by votes (descending)
+    const sortedParticipants = database.participants
+        .map(participant => ({
+            ...participant,
+            votes: voteCount.get(participant.id) || 0
+        }))
+        .sort((a, b) => b.votes - a.votes)
+        .slice(0, limit);
+    
+    return sortedParticipants;
+}
+
+// Function to update the rankings display
+function updateTopRankings() {
+    const rankingsContainer = document.getElementById('top-rankings');
+    if (!rankingsContainer) return;
+    
+    const topParticipants = calculateTopVotedParticipants();
+    
+    if (topParticipants.length === 0) {
+        rankingsContainer.innerHTML = '<p class="no-data">No participants yet</p>';
+        return;
+    }
+    
+    const rankingsList = topParticipants.map((participant, index) => `
+        <div class="ranking-item">
+            <div class="rank">#${index + 1}</div>
+            <div class="participant-info">
+                <span class="name">${participant.name}</span>
+                <span class="votes">${participant.votes} votes</span>
+            </div>
+        </div>
+    `).join('');
+    
+    rankingsContainer.innerHTML = rankingsList;
+}
+
+// Update rankings whenever votes change
+function updateStats() {
+    // Update existing stats
+    document.getElementById('total-participants').textContent = database.participants.length;
+    document.getElementById('total-votes').textContent = database.votes.length;
+    document.getElementById('total-songs').textContent = database.songs.length;
+    
+    // Update rankings
+    updateTopRankings();
+}
+
+// Call updateStats when page loads and after any vote
+document.addEventListener('DOMContentLoaded', updateStats);
+
 // Helper function to generate initials avatar
 function getInitialsAvatar(name) {
     return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="%23667eea"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-size="12">${name.charAt(0).toUpperCase()}</text></svg>`;
@@ -298,5 +480,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentTab = document.querySelector('.tab-content.active');
     if (currentTab) {
         loadTabContent(currentTab.id);
+    }
+    
+    updateAccessUI();
+    // Load user participation status if logged in
+    if (isLoggedIn && currentUser) {
+        userParticipation = database.participants.some(p => p.email === currentUser.email);
+        updateAccessUI();
     }
 });

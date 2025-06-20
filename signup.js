@@ -195,6 +195,29 @@ function togglePassword(inputId, show) {
     eyeOffIcon.style.display = show ? 'none' : 'block';
 }
 
+// Function to toggle password visibility
+function togglePasswordVisibility(inputId, icon) {
+    try {
+        const input = document.getElementById(inputId);
+        if (!input) {
+            console.error('Password input not found:', inputId);
+            return;
+        }
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    } catch (error) {
+        console.error('Error toggling password visibility:', error);
+    }
+}
+
 // Initialize password toggle buttons
 document.addEventListener('DOMContentLoaded', function() {
     const passwordInputs = ['password', 'confirm-password'];

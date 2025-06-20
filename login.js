@@ -9,28 +9,52 @@ let database = JSON.parse(localStorage.getItem('kpopCompetitionData')) || {
 
 // Google Sign-In handling
 function handleGoogleSignIn(response) {
+    if (!response.credential) {
+        showMessage('login-message', 'Google sign-in failed. Please try again.', 'error');
+        return;
+    }
+
     const credential = response.credential;
     const payload = parseJwt(credential);
     
+    // Create user object from Google data
     const user = {
         id: payload.sub,
         name: payload.name,
         email: payload.email,
         picture: payload.picture,
-        provider: 'google'
+        provider: 'google',
+        emailVerified: payload.email_verified,
+        createdAt: new Date().toISOString()
     };
     
-    // Save user to database if new
-    saveUser(user);
-    
-    // Save auth state
-    sessionStorage.setItem('currentUser', JSON.stringify(user));
-    sessionStorage.setItem('isLoggedIn', 'true');
-    
-    showMessage('login-message', 'Sign in successful! Redirecting...', 'success');
-    setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 1500);
+    try {
+        // Save user to database if new
+        saveUser(user);
+        
+        // Save auth state
+        sessionStorage.setItem('currentUser', JSON.stringify(user));
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('googleCredential', credential); // Store for token refresh
+        
+        // Save remember me state if checked
+        const remember = document.getElementById('remember').checked;
+        if (remember) {
+            localStorage.setItem('rememberUser', JSON.stringify({
+                email: user.email,
+                userId: user.id,
+                provider: 'google'
+            }));
+        }
+        
+        showMessage('login-message', 'Sign in successful! Redirecting...', 'success');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1500);
+    } catch (error) {
+        console.error('Google sign-in error:', error);
+        showMessage('login-message', 'An error occurred during sign-in. Please try again.', 'error');
+    }
 }
 
 function parseJwt(token) {
@@ -221,3 +245,17 @@ document.addEventListener('DOMContentLoaded', function() {
         togglePasswordVisibility(false);
     });
 });
+
+// Function to toggle password visibility
+function togglePasswordVisibility(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}

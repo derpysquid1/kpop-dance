@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/jpg" href="/kpop dance/asset/logo.png">
     <title>K-pop Dance Competition - Admin Dashboard</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        .admin-wrapper {
-            padding: 20px;
+    <style>        .admin-wrapper {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 0;
         }
 
         .login-container {
@@ -27,18 +27,57 @@
 
         .dashboard-container.active {
             display: block;
-        }
-
-        .admin-nav {
+        }        .admin-nav {
             display: flex;
             gap: 15px;
-            margin-bottom: 30px;
+            margin: 0 20px 30px;
             flex-wrap: wrap;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
         }
 
         .admin-nav button {
             flex: 1;
             min-width: 150px;
+            padding: 12px 20px;
+            background: #f0f0f1;
+            border: none;
+            border-radius: 4px;
+            color: #1d2327;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .admin-nav button:hover {
+            background: #e5e5e5;
+            color: #2271b1;
+        }
+
+        .admin-nav button.active {
+            background: #2271b1;
+            color: #ffffff;
+        }
+
+        .admin-nav button i {
+            font-size: 15px;
+            transition: color 0.2s ease;
+        }
+
+        .admin-nav button:hover i {
+            color: #2271b1;
+        }
+
+        .admin-nav button.active i {
+            color: #ffffff;
         }
 
         .data-table {
@@ -97,34 +136,152 @@
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
-        }
-
-        .admin-header {
+        }        .admin-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin: 20px 20px 30px;
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
         }
 
         .admin-header h1 {
             margin: 0;
-            color: white;
-        }
-
-        .refresh-btn {
+            color: #1d2327;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }        .refresh-btn {
             padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.2);
+            background: #f0f0f1;
             border: none;
-            border-radius: 20px;
-            color: white;
+            border-radius: 4px;
+            color: #1d2327;
             cursor: pointer;
-            backdrop-filter: blur(10px);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
 
         .refresh-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #e5e5e5;
+            color: #2271b1;
+        }
+
+        .refresh-btn i {
+            font-size: 15px;
+            color: #50575e;
+            transition: color 0.2s ease;
+        }
+
+        .refresh-btn:hover i {
+            color: #2271b1;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: #fff;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-section {
+            margin-bottom: 20px;
+        }
+
+        .footer-section h3 {
+            color: #2271b1;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .footer-section p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #2271b1;
+        }
+
+        .footer-links i {
+            font-size: 14px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-links a {
+            color: #666;
+            font-size: 20px;
+            transition: color 0.2s;
+        }
+
+        .social-links a:hover {
+            color: #2271b1;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #666;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                padding: 30px 0 15px;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="admin-wrapper">
@@ -159,9 +316,7 @@
             <div class="admin-nav">
                 <button class="nav-btn active" onclick="showAdminTab('overview')">📊 Overview</button>
                 <button class="nav-btn" onclick="showAdminTab('participants')">👥 Participants</button>
-                <button class="nav-btn" onclick="showAdminTab('votes')">🗳️ Votes</button>
-                <button class="nav-btn" onclick="showAdminTab('songs')">🎵 Songs</button>
-                <button class="nav-btn" onclick="showAdminTab('settings')">⚙️ Settings</button>
+                <button class="nav-btn" onclick="showAdminTab('votes')">🗳️ Votes</button>                <button class="nav-btn" onclick="showAdminTab('songs')">🎵 Songs</button>
             </div>
 
             <!-- Overview Tab -->
@@ -254,12 +409,10 @@
 
             <!-- Songs Tab -->
             <div id="songs" class="admin-tab">
-                <div class="filter-section">
-                    <div class="form-group" style="display: inline-block; width: 200px; margin-right: 15px;">
+                <div class="filter-section">                    <div class="form-group" style="display: inline-block; width: 200px; margin-right: 15px;">
                         <input type="text" id="song-search" placeholder="Search songs...">
                     </div>
                     <button class="btn" onclick="exportSongs()">📥 Export Songs</button>
-                    <button class="btn" onclick="showAddSongModal()">➕ Add New Song</button>
                 </div>
 
                 <div class="data-table-container">
@@ -280,37 +433,40 @@
                         </tbody>
                     </table>
                 </div>
+            </div>        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Admin Dashboard</h3>
+                <p>Manage and monitor the K-pop Dance Competition platform. Access participant data, voting statistics, and song submissions.</p>
             </div>
-
-            <!-- Settings Tab -->
-            <div id="settings" class="admin-tab">
-                <div class="admin-section">
-                    <h3>🔐 Security Settings</h3>
-                    <form id="security-form">
-                        <div class="form-group">
-                            <label for="new-password">New Password</label>
-                            <input type="password" id="new-password">
-                        </div>
-                        <div class="form-group">
-                            <label for="confirm-password">Confirm Password</label>
-                            <input type="password" id="confirm-password">
-                        </div>
-                        <button type="submit" class="btn">Update Password</button>
-                    </form>
-                </div>
-
-                <div class="admin-section">
-                    <h3>🗑️ Data Management</h3>
-                    <div style="margin-bottom: 20px;">
-                        <button class="btn" onclick="backupData()">💾 Backup All Data</button>
-                        <button class="btn" onclick="clearAllData()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
-                            🗑️ Clear All Data
-                        </button>
-                    </div>
-                </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html"><i class="fas fa-home"></i> Main Site</a></li>
+                    <li><a href="#"><i class="fas fa-book"></i> Admin Guide</a></li>
+                    <li><a href="#"><i class="fas fa-shield"></i> Security Policy</a></li>
+                    <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="mailto:admin@kpopdance.com"><i class="fas fa-envelope"></i> admin@kpopdance.com</a></li>
+                    <li><a href="tel:+1234567890"><i class="fas fa-phone"></i> +1 (234) 567-890</a></li>
+                    <li><a href="#"><i class="fas fa-headset"></i> Admin Support</a></li>
+                </ul>
             </div>
         </div>
-    </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 GZ Production Bali Event Organizer</p>
+        </div>
+    </footer>
 
     <script src="admin.js"></script>
 </body>

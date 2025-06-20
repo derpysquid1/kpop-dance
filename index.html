@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-pop Dance Competition</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="shortcut icon" type="image/jpg" href="/kpop dance/asset/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://accounts.google.com/gsi/client" async></script>
     <script src="main.js" defer></script>
 </head>
@@ -19,14 +21,28 @@
             </div>
             <h1>🎵 K-pop Dance Competition 🎵</h1>
             <p>Show your moves and compete with the best K-pop dancers!</p>
-        </div>        <div class="nav-tabs">
-            <button class="nav-btn active" onclick="showTab('home')">🏠 Home</button>
-            <button class="nav-btn" onclick="showTab('register')">📝 Register</button>
-            <button class="nav-btn" onclick="showTab('voting')">🗳️ Vote</button>
-            <button class="nav-btn" onclick="showTab('submit-song')">📤 Submit Song</button>
-            <button class="nav-btn" onclick="showTab('profile')" id="profile-btn" style="display: none;">👤 Profile</button>
-            <button class="nav-btn" onclick="window.location.href='admin.html'">⚙️ Admin</button>
-            <button class="nav-btn login-btn" onclick="window.location.href='login.html'" style="margin-left: auto;">🔐 Login</button>
+        </div>        <div class="nav-tabs">            <button class="nav-btn active" onclick="showTab('home')" title="Home page">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </button>            <button class="nav-btn disabled" onclick="showTab('register')" title="Please sign in">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Register</span>
+            </button>
+            <button class="nav-btn" onclick="showTab('voting')" title="Vote for participants">
+                <i class="fa-solid fa-check-to-slot"></i>
+                <span>Vote</span>
+            </button>            <button class="nav-btn disabled" onclick="showTab('submitSong')" title="Please sign in to access this feature">
+                <i class="fa-solid fa-music"></i>
+                <span>Submit Song</span>
+            </button>
+            <button class="nav-btn" onclick="showTab('profile')" id="profile-btn" style="display: none;" title="View your profile">
+                <i class="fa-solid fa-user"></i>
+                <span>Profile</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='login.html'" style="margin-left: auto;">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>Login</span>
+            </button>
         </div>
 
         <!-- Home Tab -->
@@ -34,8 +50,7 @@
             <div class="admin-section">
                 <h2>🏆 Welcome to K-pop Dance Competition!</h2>
                 <p>Join the ultimate K-pop dance competition and showcase your talent! Register to participate, vote for your favorite dancers, and submit your favorite K-pop songs for the competition.</p>
-                
-                <div class="stats">
+                  <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number" id="total-participants">0</div>
                         <div class="stat-label">Total Participants</div>
@@ -49,11 +64,18 @@
                         <div class="stat-label">Available Songs</div>
                     </div>
                 </div>
+                
+                <div class="top-rankings">
+                    <h3>🏆 Top Voted Participants</h3>
+                    <div class="rankings-list" id="top-rankings">
+                        <!-- Rankings will be loaded here -->
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Registration Tab -->
-        <div id="register" class="tab-content">
+        <div id="register" class="tab-content" >
             <h2>📝 Register for Competition</h2>
             <div id="register-message"></div>
             
@@ -121,24 +143,34 @@
             </form>
         </div>
 
-        <!-- Voting Tab -->
-        <div id="voting" class="tab-content">
+        <!-- Voting Tab -->        <div id="voting" class="tab-content">
             <h2>🗳️ Vote for Your Favorite Dancers</h2>
             <div id="voting-message"></div>
             
             <div class="form-group">
                 <label for="voter-name">Your Name (for voting record) *</label>
-                <input type="text" id="voter-name" placeholder="Enter your name">
+                <input type="text" id="voter-name" placeholder="Enter your name" required>
             </div>
             
             <div class="form-group">
                 <label for="voter-email">Your Email *</label>
-                <input type="email" id="voter-email" placeholder="Enter your email">
+                <input type="email" id="voter-email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="selected-participant">Select Participant to Vote *</label>
+                <select id="selected-participant" required>
+                    <option value="">-- Select a Participant --</option>
+                    <!-- Participants will be loaded here -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="vote-comment">Comment (Optional)</label>
+                <textarea id="vote-comment" placeholder="Why are you voting for this participant?" rows="3"></textarea>
             </div>
             
-            <div id="participants-list" class="participants-grid">
-                <!-- Participants will be loaded here -->
-            </div>
+            <button onclick="submitVote()" class="btn">Submit Vote</button>
         </div>
         <!-- Submit Song Tab -->
         <div id="submit-song" class="tab-content">
@@ -235,5 +267,55 @@
 
     </div>
 
-   </body>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About K-pop Dance Competition</h3>
+                <p>Join the ultimate K-pop dance competition and showcase your talent! We bring together passionate dancers from around the world to celebrate K-pop culture.</p>
+                <div class="social-links">
+                    <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#"><i class="fas fa-user-plus"></i> Register</a></li>
+                    <li><a href="#"><i class="fas fa-check-to-slot"></i> Vote</a></li>
+                    <li><a href="#"><i class="fas fa-music"></i> Submit Song</a></li>
+                    <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <ul class="footer-links">
+                    <li><a href="mailto:contact@kpopdance.com"><i class="fas fa-envelope"></i> contact@kpopdance.com</a></li>
+                    <li><a href="tel:+1234567890"><i class="fas fa-phone"></i> +1 (234) 567-890</a></li>
+                    <li><a href="#"><i class="fas fa-location-dot"></i> Seoul, South Korea</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-circle-info"></i> FAQ</a></li>
+                    <li><a href="#"><i class="fas fa-book"></i> Rules & Guidelines</a></li>
+                    <li><a href="#"><i class="fas fa-shield"></i> Privacy Policy</a></li>
+                    <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                    <li><a href="#"><i class="fas fa-headset"></i> Support Center</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 GZ Production Bali Event Organize</p>
+        </div>
+    </footer>
+</body>
 </html>
